@@ -1,0 +1,18 @@
+# Source data archive — contains all PII, never commit
+AYSO_Rosters.tar.gz
+AYSO_Rosters/
+
+# Any future raw exports / spreadsheets that might land in this folder
+*.xlsx
+*.csv
+*.tsv
+
+# But allow committed examples that are explicitly sanitized
+!examples/**/*.csv
+!examples/**/*.tsv
+
+# Python / OS
+__pycache__/
+*.py[cod]
+.DS_Store
+._*
