@@ -14,7 +14,7 @@ Two seasons of incremental patches (see the 24-25 → 25-26 evolution in `REVIEW
 
 - `[~]` **`field_map.yaml` per season** — semantic names for AYSO's volatile column headers and per-season filenames. Updating IDs becomes a config edit rather than a code change, and a missing key fails at startup. (Scaffold landed; consumed once the new script exists.)
 - `[~]` **`overrides.yaml` per division** — single schema replacing `Pairs.txt` + `Add_AssociatedPlayers.txt` + the `Team` column in `Extra_Allocated.csv`, and folding in 24-25's standalone `requests.txt` notes. One file, one parser, one validation pass. (Template scaffolded at `26-27-Season/overrides.example.yaml`; consumed once the new script exists.)
-- `[ ]` **Schema validation at startup** — missing required fields, unknown keys, malformed YAML all fail loudly with line numbers before any roster work begins.
+- `[x]` **Schema validation at startup** — `26-27-Season/validate.py`. Stand-alone CLI (`python validate.py [SEASON_DIR]`) plus importable `load_field_map()` / `load_overrides()` for the future processing script. Three tiers: `[OK]` / `[BLOCKER]` (non-zero exit) / `[WARNING]`. Catches malformed YAML, missing required keys, wrong types, unknown override sections (typo detection), and `(TBD)` form IDs still in `field_map.yaml`.
 
 ## Phase 2 — Pipeline
 
