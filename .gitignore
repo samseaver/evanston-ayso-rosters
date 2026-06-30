@@ -7,9 +7,11 @@ AYSO_Rosters/
 *.csv
 *.tsv
 
-# But allow committed examples that are explicitly sanitized
+# But allow committed examples and test fixtures that are explicitly sanitized
 !examples/**/*.csv
 !examples/**/*.tsv
+!**/tests/fixtures/**/*.csv
+!**/tests/fixtures/**/*.tsv
 
 # Python / OS
 __pycache__/
