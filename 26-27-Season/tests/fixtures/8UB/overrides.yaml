@@ -1,0 +1,11 @@
+# Test fixture overrides for the synthetic 8UB division.
+# Exercises every section so the loader has something to find in each.
+
+groups:
+  - [Anna Smith, Mia Williams]
+
+coach_children:
+  Jordan Lee: [Sophie Lee]
+
+notes:
+  Mia Williams: "Family asked to be on the same team as Anna Smith last year."

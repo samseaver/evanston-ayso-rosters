@@ -1,0 +1,9 @@
+# Test fixture field_map.
+# Uses synthetic form IDs (99999nnn) that are obviously not real AYSO IDs.
+ratings:
+  current_season_file: "2026_Player_Ratings.tsv"
+  previous_season_file: "2025_Player_Ratings.tsv"
+
+fields:
+  years_experience: "Years of Experience:(99999001)"
+  experience_level: "Player's Experience Level(99999002)"
