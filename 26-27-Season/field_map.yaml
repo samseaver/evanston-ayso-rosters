@@ -1,0 +1,31 @@
+# 26-27-Season/field_map.yaml
+#
+# Maps semantic names to AYSO's volatile column headers and per-season
+# filenames. Update the form IDs (the parenthesised numbers below) when
+# AYSO publishes the 26-27 registration forms — they change every season.
+#
+# To find the new IDs: open a fresh Unallocated.txt export and grep for
+# "Years of Experience" and "Player's Experience Level" — the column
+# headers will include the new (NNNNNNNN) IDs.
+#
+# Historical reference (do NOT use these for 26-27 — confirm against the
+# 26-27 export):
+#   24-25 used  Years of Experience:(14698163)
+#               Player's Experience Level(14698164)
+#   25-26 used  Years of Experience:(18939060)
+#               Player's Experience Level(18939062)
+
+ratings:
+  # Current-season player ratings, exported from AYSO each year
+  current_season_file: "2026_Player_Ratings.tsv"
+  # Previous-season ratings used as a fallback when the current season's
+  # ratings haven't been collected yet
+  previous_season_file: "../25-26-Season/2025_Player_Ratings.tsv"
+
+fields:
+  # Full column header (including AYSO's form ID in parens) for the
+  # "Years of Experience" field on the registration form.
+  years_experience: "Years of Experience:(TBD)"
+
+  # Full column header for the "Player's Experience Level" enum field.
+  experience_level: "Player's Experience Level(TBD)"
