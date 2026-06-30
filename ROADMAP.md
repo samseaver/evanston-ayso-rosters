@@ -18,10 +18,10 @@ Two seasons of incremental patches (see the 24-25 → 25-26 evolution in `REVIEW
 
 ## Phase 2 — Pipeline
 
-- `[~]` **Normalised name matching** — `26-27-Season/names.py`. Lowercase + accent strip + collapse whitespace + drop parenthetical annotations + nickname table (bob/robert, liz/elizabeth, etc.); covered by 25 unit tests. Library complete; main-pipeline usage with ambiguous-match reporting lands as part of the processing script.
-- `[ ]` **Structured `validation_report.md` per division** — replaces the current scattered `print` warnings. Severities: BLOCKER (script will produce wrong output), WARNING (proceeded but check), INFO (overrides used). Non-zero exit on any BLOCKER.
-- `[ ]` **One `assemble_teams(balance_by=...)` function** — replaces the parallel 5U/6U DOB-balanced and 8U+ rating-balanced code paths. Single tested function, parameterised.
-- `[ ]` **Drop the coefficient-of-variation rating fallback** — replace with documented rules: previous-season rating → experience enum → `needs_rating.md` (player surfaced for human assignment). No silent defaults.
+- `[x]` **Normalised name matching** — `26-27-Season/names.py`. Lowercase + accent strip + collapse whitespace + drop parenthetical annotations + nickname table (bob/robert, liz/elizabeth, etc.). Wired into assembly.py for coach→child resolution and group/override player-name matching. Ambiguous matches log a BLOCKER pointing at `overrides.yaml`. 25 unit tests.
+- `[~]` **Structured `validation_report.md` per division** — assembly returns a list of `LogEntry(severity, code, message)` with BLOCKER/WARNING/INFO tiers; non-zero exit on any BLOCKER. Currently printed to stdout from process.py; the markdown writer (`report.py`) is the remaining piece.
+- `[~]` **`assemble_teams()` in `26-27-Season/assembly.py`** — rating-based 8U–14U path complete with end-to-end test covering nickname/accent matching, parent-index resolution, overrides fallback, group placement, TBD skipping, even-split sizing. 5U/6U DOB path still raises `NotImplementedError`; the `balance_by=` unification is the remaining piece.
+- `[x]` **Drop the coefficient-of-variation rating fallback** — replaced by `26-27-Season/ratings.py`: current TSV → previous TSV → experience enum → `None`, with `needs_rating` list surfaced as BLOCKERs. EXTRA-league floor of 4 still applied. No silent defaults.
 
 ## Phase 3 — Outputs
 
@@ -30,8 +30,8 @@ Two seasons of incremental patches (see the 24-25 → 25-26 evolution in `REVIEW
 
 ## Phase 4 — Workflow
 
-- `[ ]` **Single entrypoint** — `python rosters.py 26-27-Season` runs every division; `--only DIV` for iteration. Exits non-zero if any division has BLOCKERs.
-- `[ ]` **Slim the wide exports at load time** — Personnel has 96 columns; the script reads 5. Unallocated has 50; the script reads ~10. Drop everything else at the loader, keeping the originals on disk for forensics.
+- `[~]` **Single entrypoint** — `26-27-Season/process.py` runs one division end-to-end (`python process.py SEASON_DIR DIVISION`). Multi-division batch loop (`python rosters.py SEASON_DIR [--only DIV]`) is the remaining piece.
+- `[x]` **Slim the wide exports at load time** — `26-27-Season/loaders.py` reads only the columns the pipeline uses, returning typed dataclasses (`Player`, `Volunteer`, `CoachAssignment`). Originals stay on disk untouched for forensics.
 
 ## Out of scope (acknowledged ceilings)
 
