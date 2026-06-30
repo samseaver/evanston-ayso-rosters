@@ -3,7 +3,7 @@ PlayerID	Player Name	UserID	Comments	Recent Team	Age	Division Price Payment Stat
 90000002	Jack Johnson	91100002		NA	7	Paid	06/22/2018	Patricia	Johnson	M	patricia.johnson@example.com	555-0102	Mark	Johnson	3	Has played recreational soccer (AYSO or similar)
 90000003	Liam Johnson	91100003		NA	6	Paid	09/15/2019	Patricia	Johnson	M	patricia.johnson@example.com	555-0102	Mark	Johnson	1	No or limited soccer experience
 90000004	Carlos Rivera	91100004		NA	7	Paid	01/05/2019	María	Rivera	M	maria.rivera@example.com	555-0103	Diego	Rivera	2	Has played recreational soccer (AYSO or similar)
-90000005	Sophie Lee	91100005		NA	7	Paid	11/22/2018	Jordan	Lee	F	jordan.lee@example.com	555-0104	Pat	Lee	No Answer	No Answer
+90000005	Sophie Lee	91100005		NA	7	Paid	11/22/2018	Jordan	Lee	F	jordan.lee@example.com	555-0104	Pat	Lee	No Answer	Has played recreational soccer (AYSO or similar)
 90000006	Owen Park	91100006		NA	6	Paid	02/14/2019	Jin	Park	M	jin.park@example.com	555-0105	Min	Park	0	No or limited soccer experience
 90000007	Mia Williams	91100007		NA	7	InProc	04/30/2018	Jamie	Williams	F	jamie.williams@example.com	555-0106	Casey	Williams	1	Has played recreational soccer (AYSO or similar)
 90000008	Noah Wilson	91100008		NA	6	Paid	08/05/2019	Andy	Wilson	M	andy.wilson@example.com	555-0107	Kelly	Wilson	0	No or limited soccer experience
