@@ -34,9 +34,12 @@ from loaders import (
 )
 from output import write_teams_csv
 from report import write_report
+from summary import DivisionResult, write_division_summary
 
 
-def run(season_dir: Path, division: str, extra_player_ids=None) -> int:
+def run(season_dir: Path, division: str, extra_player_ids=None) -> DivisionResult:
+    """Process one division end-to-end. Returns a DivisionResult with
+    aggregate counts and an exit_code (0=clean, 1=blocker, 2=fail)."""
     extra_player_ids = extra_player_ids or set()
     div_dir = season_dir / division
 
@@ -44,7 +47,7 @@ def run(season_dir: Path, division: str, extra_player_ids=None) -> int:
         field_map, fm_warnings = load_field_map(season_dir / "field_map.yaml")
     except ValidationError as e:
         print(f"[BLOCKER] {e}", file=sys.stderr)
-        return 2
+        return DivisionResult.failed(division)
 
     overrides, ov_warnings = load_overrides(div_dir / "overrides.yaml")
 
@@ -54,7 +57,7 @@ def run(season_dir: Path, division: str, extra_player_ids=None) -> int:
         coach_assignments = load_coach_assignments(div_dir / f"{division}_Coaches.tsv")
     except ValidationError as e:
         print(f"[BLOCKER] {e}", file=sys.stderr)
-        return 2
+        return DivisionResult.failed(division)
 
     current_ratings = load_ratings(season_dir / field_map["ratings"]["current_season_file"])
     previous_ratings_path = season_dir / field_map["ratings"]["previous_season_file"]
@@ -86,27 +89,31 @@ def run(season_dir: Path, division: str, extra_player_ids=None) -> int:
 
     output_path = div_dir / f"{division}_Teams.csv"
     report_path = div_dir / f"{division}_validation_report.md"
+    summary_path = div_dir / f"{division}_summary.md"
     write_teams_csv(output_path, division, teams, volunteers)
     write_report(report_path, division, teams, log)
-
-    blockers = [e for e in log if e.severity == "BLOCKER"]
-    warnings = [e for e in log if e.severity == "WARNING"]
-    infos = [e for e in log if e.severity == "INFO"]
+    write_division_summary(summary_path, division, teams, log, overrides=overrides)
 
     for entry in log:
         stream = sys.stderr if entry.severity == "BLOCKER" else sys.stdout
         print(f"[{entry.severity}] {entry.code}: {entry.message}", file=stream)
 
+    blockers = [e for e in log if e.severity == "BLOCKER"]
+    warnings = [e for e in log if e.severity == "WARNING"]
+    infos = [e for e in log if e.severity == "INFO"]
+
     print()
     print(f"Wrote {output_path}")
     print(f"Wrote {report_path}")
+    print(f"Wrote {summary_path}")
     print(
         f"Summary: {len(teams)} team(s), "
         f"{sum(t.size() for t in teams)} player(s) placed, "
         f"{len(blockers)} blocker(s), {len(warnings)} warning(s), {len(infos)} info(s)"
     )
 
-    return 1 if blockers else 0
+    exit_code = 1 if blockers else 0
+    return DivisionResult.from_run(division, teams, log, exit_code)
 
 
 def main():
@@ -122,7 +129,8 @@ def main():
     args = parser.parse_args()
 
     extra_ids = {x.strip() for x in args.extras.split(",") if x.strip()}
-    sys.exit(run(args.season_dir, args.division, extra_player_ids=extra_ids))
+    result = run(args.season_dir, args.division, extra_player_ids=extra_ids)
+    sys.exit(result.exit_code)
 
 
 if __name__ == "__main__":

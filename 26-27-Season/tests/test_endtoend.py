@@ -26,8 +26,10 @@ class TestEndToEnd8UB(unittest.TestCase):
         cls.tmpdir = Path(tempfile.mkdtemp(prefix="ayso_e2e_"))
         season = cls.tmpdir / "26-27"
         shutil.copytree(FIXTURES, season)
-        cls.exit_code = process.run(season, "8UB")
+        cls.result = process.run(season, "8UB")
+        cls.exit_code = cls.result.exit_code
         cls.output_path = season / "8UB" / "8UB_Teams.csv"
+        cls.summary_path = season / "8UB" / "8UB_summary.md"
 
     @classmethod
     def tearDownClass(cls):
@@ -45,6 +47,22 @@ class TestEndToEnd8UB(unittest.TestCase):
         body = report_path.read_text()
         self.assertIn("# 8UB validation report", body)
         self.assertIn("**Status:** READY", body)
+
+    def test_division_summary_md_written(self):
+        self.assertTrue(self.summary_path.exists())
+        body = self.summary_path.read_text()
+        self.assertIn("# 8UB summary", body)
+        self.assertIn("**Status:** READY", body)
+        self.assertIn("## Team 1 — 8UB - 01", body)
+        self.assertIn("## Overrides used", body)
+        self.assertIn("`coach_children` · Jordan Lee", body)
+
+    def test_result_object_populated(self):
+        self.assertEqual(self.result.division, "8UB")
+        self.assertEqual(self.result.status, "READY")
+        self.assertEqual(self.result.teams_count, 2)
+        self.assertEqual(self.result.players_count, 10)
+        self.assertEqual(self.result.blockers_count, 0)
 
     def test_output_header(self):
         with open(self.output_path) as f:
