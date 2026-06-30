@@ -33,25 +33,36 @@ class TestRostersBatch(unittest.TestCase):
             code = rosters.run(self.season)
         text = out.getvalue()
         self.assertEqual(code, 0)
-        self.assertIn("5U: OK", text)
-        self.assertIn("8UB: OK", text)
+        self.assertIn("5U: READY", text)
+        self.assertIn("8UB: READY", text)
         self.assertIn("All divisions ready", text)
+
+    def test_season_summary_md_written(self):
+        with patch("sys.stdout", new_callable=StringIO):
+            rosters.run(self.season)
+        season_summary = self.season / "season_summary.md"
+        self.assertTrue(season_summary.exists())
+        body = season_summary.read_text()
+        self.assertIn("26-27 season summary", body)
+        self.assertIn("| 5U | READY", body)
+        self.assertIn("| 8UB | READY", body)
+        self.assertIn("all READY", body)
 
     def test_only_filters_to_one_division(self):
         with patch("sys.stdout", new_callable=StringIO) as out:
             code = rosters.run(self.season, only=["8UB"])
         text = out.getvalue()
         self.assertEqual(code, 0)
-        self.assertIn("8UB", text)
-        self.assertNotIn("5U: OK", text)
+        self.assertIn("8UB: READY", text)
+        self.assertNotIn("5U: READY", text)
 
     def test_skip_excludes_division(self):
         with patch("sys.stdout", new_callable=StringIO) as out:
             code = rosters.run(self.season, skip=["5U"])
         text = out.getvalue()
         self.assertEqual(code, 0)
-        self.assertIn("8UB: OK", text)
-        self.assertNotIn("5U: OK", text)
+        self.assertIn("8UB: READY", text)
+        self.assertNotIn("5U: READY", text)
 
     def test_missing_season_dir_returns_2(self):
         code = rosters.run(self.tmpdir / "does_not_exist")

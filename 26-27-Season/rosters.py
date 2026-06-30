@@ -21,6 +21,7 @@ import sys
 from pathlib import Path
 
 import process
+from summary import DivisionResult, write_season_summary
 
 
 # Known AYSO divisions in the order we like to report them.
@@ -33,8 +34,6 @@ KNOWN_DIVISIONS = [
 ]
 
 
-# 0 -> code from process.run; map to a short human label for the summary.
-_STATUS_LABELS = {0: "OK", 1: "BLOCKED", 2: "FAILED"}
 
 
 def run(season_dir: Path, only=None, skip=None):
@@ -62,20 +61,26 @@ def run(season_dir: Path, only=None, skip=None):
     for div in divisions:
         print(f"\n=== {div} ===")
         try:
-            code = process.run(season_dir, div)
+            result = process.run(season_dir, div)
         except Exception as e:  # broad on purpose — never let one division kill the batch
             print(f"[FAILED] {div}: {type(e).__name__}: {e}", file=sys.stderr)
-            code = 2
-        results.append((div, code))
+            result = DivisionResult.failed(div)
+        results.append(result)
+
+    season_summary_path = season_dir / "season_summary.md"
+    write_season_summary(season_summary_path, season_dir.name, results)
+    print(f"\nWrote {season_summary_path}")
 
     print("\n=== Summary ===")
-    for div, code in results:
-        label = _STATUS_LABELS.get(code, f"?({code})")
-        print(f"  {div}: {label}")
+    for r in results:
+        print(f"  {r.division}: {r.status}")
 
-    bad = [d for d, c in results if c != 0]
+    bad = [r for r in results if r.exit_code != 0]
     if bad:
-        print(f"\n{len(bad)} division(s) need attention before SportConnect upload.", file=sys.stderr)
+        print(
+            f"\n{len(bad)} division(s) need attention before SportConnect upload.",
+            file=sys.stderr,
+        )
         return 1
     print("\nAll divisions ready for upload.")
     return 0

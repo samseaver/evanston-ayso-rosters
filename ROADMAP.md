@@ -25,8 +25,8 @@ Two seasons of incremental patches (see the 24-25 → 25-26 evolution in `REVIEW
 
 ## Phase 3 — Outputs
 
-- `[ ]` **Per-division `<DIV>_summary.md`** replacing the byproduct trio (`_Ratings.tsv`, `_Team_Ratings.tsv`, `_Extra_Teams.txt`). Human-readable team breakdown, balance metrics, override usage, warning summary. The `_Teams.csv` SportConnect upload artifact stays unchanged.
-- `[ ]` **Top-level `season_summary.md`** — every division listed as `ready` / `has warnings` / `blocked`. At-a-glance "what's safe to upload right now".
+- `[x]` **Per-division `<DIV>_summary.md`** — `26-27-Season/summary.py`. Replaces the `_Ratings.tsv` + `_Team_Ratings.tsv` + `_Extra_Teams.txt` byproduct trio with one markdown artifact: status header, per-team breakdown (coaches, player table with ratings/ages/gender, balance metrics), overrides-used section, pointer to the Teams.csv and validation_report.md. Written by `process.py` alongside the other outputs.
+- `[x]` **Top-level `season_summary.md`** — every division as a row in one markdown table (status, team count, player count, blocker/warning/note counts). Written by `rosters.py` after the batch completes. "Overall" line says READY across the board or names which divisions need attention.
 
 ## Phase 4 — Workflow
 
