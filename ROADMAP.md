@@ -18,7 +18,7 @@ Two seasons of incremental patches (see the 24-25 → 25-26 evolution in `REVIEW
 
 ## Phase 2 — Pipeline
 
-- `[ ]` **Normalised name matching** — lowercase + accent strip + collapse whitespace + drop parenthetical annotations + nickname table, replacing the current substring `find_player`. Ambiguous matches (0 or >1 candidates) emit an actionable line pointing at `overrides.yaml`.
+- `[~]` **Normalised name matching** — `26-27-Season/names.py`. Lowercase + accent strip + collapse whitespace + drop parenthetical annotations + nickname table (bob/robert, liz/elizabeth, etc.); covered by 25 unit tests. Library complete; main-pipeline usage with ambiguous-match reporting lands as part of the processing script.
 - `[ ]` **Structured `validation_report.md` per division** — replaces the current scattered `print` warnings. Severities: BLOCKER (script will produce wrong output), WARNING (proceeded but check), INFO (overrides used). Non-zero exit on any BLOCKER.
 - `[ ]` **One `assemble_teams(balance_by=...)` function** — replaces the parallel 5U/6U DOB-balanced and 8U+ rating-balanced code paths. Single tested function, parameterised.
 - `[ ]` **Drop the coefficient-of-variation rating fallback** — replace with documented rules: previous-season rating → experience enum → `needs_rating.md` (player surfaced for human assignment). No silent defaults.
