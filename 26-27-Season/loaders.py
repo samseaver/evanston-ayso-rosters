@@ -57,6 +57,7 @@ class Player:
     years_experience: Optional[int]
     experience_level: str
     primary_email: str
+    rating: Optional[int] = None  # filled by ratings.resolve_all() after load
 
 
 @dataclass
@@ -208,9 +209,13 @@ def load_coach_assignments(coaches_path):
 def load_ratings(ratings_path):
     """Read a season-level player ratings TSV.
 
-    Returns dict[(player_first_lower, player_last_lower)] -> int rating.
+    Returns dict[(normalised_first, normalised_last)] -> int rating. Keys are
+    name-normalised via names.normalise() so lookups handle accents,
+    casing, and stray whitespace consistently with the rest of the pipeline.
     Skips rows with NA or empty ratings.
     """
+    from names import normalise  # local import: keeps loaders importable in isolation
+
     ratings = {}
     with _open_text(ratings_path) as f:
         reader = csv.DictReader(f, delimiter="\t")
@@ -226,5 +231,5 @@ def load_ratings(ratings_path):
                 rating = int(raw.split()[0])
             except (ValueError, IndexError):
                 continue
-            ratings[(first.lower(), last.lower())] = rating
+            ratings[(normalise(first), normalise(last))] = rating
     return ratings

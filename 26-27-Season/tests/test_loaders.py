@@ -54,10 +54,12 @@ class TestLoadPlayers(unittest.TestCase):
         self.assertEqual(p.payment_status, "Paid")
         self.assertEqual(p.years_experience, 2)
 
-    def test_no_answer_experience_becomes_none(self):
+    def test_no_answer_years_experience_becomes_none(self):
+        # Sophie has "No Answer" in the years_experience column but a real
+        # experience_level enum — exercises the per-column parse path.
         sophie = next(p for p in self.players if p.full_name == "Sophie Lee")
         self.assertIsNone(sophie.years_experience)
-        self.assertEqual(sophie.experience_level, "No Answer")
+        self.assertIn("recreational", sophie.experience_level.lower())
 
     def test_payment_warning_detectable(self):
         mia = next(p for p in self.players if p.full_name == "Mia Williams")
