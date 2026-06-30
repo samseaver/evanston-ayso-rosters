@@ -1,0 +1,7 @@
+PlayerID	Player Name	UserID	Comments	Recent Team	Age	Division Price Payment Status	Date Of Birth	Parent FirstName	Parent LastName	Gender	Primary Contact Email	Primary Contact Telephone	Secondary Contact FirstName	Secondary Contact LastName	Years of Experience:(99999001)	Player's Experience Level(99999002)
+95000001	Olivia Adams	96100001		NA	5	Paid	02/15/2020	Mike	Adams	F	mike.adams@example.com	555-0201	Pam	Adams	0	No or limited soccer experience
+95000002	Felix Foster	96100002		NA	5	Paid	03/22/2020	Sara	Foster	M	sara.foster@example.com	555-0202	Tom	Foster	0	No or limited soccer experience
+95000003	Iris Chen	96100003		NA	4	Paid	11/03/2021	Lee	Chen	F	lee.chen@example.com	555-0203	Min	Chen	0	No or limited soccer experience
+95000004	Nico Park	96100004		NA	4	Paid	12/01/2021	Jin	Park	M	jin.park@example.com	555-0204	Sun	Park	0	No or limited soccer experience
+95000005	Maya Khan	96100005		NA	4	Paid	08/15/2021	Raj	Khan	F	raj.khan@example.com	555-0205	Priya	Khan	0	No or limited soccer experience
+95000006	Theo Reyes	96100006		NA	5	Paid	04/05/2020	Tony	Reyes	M	tony.reyes@example.com	555-0206	Ana	Reyes	0	No or limited soccer experience

@@ -245,6 +245,33 @@ def _pick_highest_rated(teams, cap):
     return max(available, key=lambda t: (t.rating_avg, t.age_avg, -t.size()))
 
 
+def _pick_least_same_gender(teams, player_gender, cap):
+    """Team with fewest same-gender players (then fewest total) under cap.
+
+    Used by the 5U/6U DOB-balanced path where gender balance is the primary
+    placement objective.
+    """
+    available = [t for t in teams if t.size() < cap]
+    if not available:
+        return None
+    return min(
+        available,
+        key=lambda t: (
+            sum(1 for p in t.players if p.gender == player_gender),
+            t.size(),
+        ),
+    )
+
+
+def _dob_sort_key(dob: str):
+    """Convert MM/DD/YYYY into a sortable tuple. Empty/malformed sort last."""
+    parts = dob.split("/") if dob else []
+    if len(parts) != 3:
+        return ("", "", "")
+    mm, dd, yyyy = parts
+    return (yyyy.zfill(4), mm.zfill(2), dd.zfill(2))
+
+
 def _avg_rating(players: Iterable[Player]) -> float:
     rated = [p.rating for p in players if p.rating is not None]
     return sum(rated) / len(rated) if rated else 0.0
@@ -257,16 +284,23 @@ def assemble_teams(
     overrides: Dict,
     division: str,
     extra_player_ids: Optional[Set[str]] = None,
+    balance_by: Optional[str] = None,
 ):
-    """Return (teams, log)."""
+    """Return (teams, log).
+
+    `balance_by` controls the placement-pass strategy after coach kids,
+    groups, and extras are placed:
+        "rating" — above-average → below-average passes (8U+ default)
+        "dob"    — DOB-sorted single pass with gender balance (5U/6U default)
+    If None, inferred from `division`.
+    """
     extra_player_ids = extra_player_ids or set()
     log: List[LogEntry] = []
 
-    if division.startswith(("5U", "6U")):
-        raise NotImplementedError(
-            f"DOB-based balancing for {division} not yet implemented; "
-            "rating-based assembly only (8U through 14U)."
-        )
+    if balance_by is None:
+        balance_by = "dob" if division.startswith(("5U", "6U")) else "rating"
+    if balance_by not in ("rating", "dob"):
+        raise ValueError(f"balance_by must be 'rating' or 'dob', got {balance_by!r}")
 
     max_per = division_max(division)
     teams = _initialize_teams(coach_assignments)
@@ -328,35 +362,50 @@ def assemble_teams(
                 if target:
                     _place(target, player, placed)
 
-    # Step 4 + 5: above/below average passes
-    avg = _avg_rating(players)
-    rated_remaining = [p for p in players if p.player_id not in placed and p.rating is not None]
+    # Step 4 + 5: placement passes (rating-based) OR single DOB pass
+    if balance_by == "rating":
+        avg = _avg_rating(players)
+        rated_remaining = [
+            p for p in players if p.player_id not in placed and p.rating is not None
+        ]
 
-    above = sorted(
-        [p for p in rated_remaining if p.rating >= avg],
-        key=lambda p: -p.rating,
-    )
-    half_cap = max_per // 2
-    for player in above:
-        if player.player_id in placed:
-            continue
-        target = _pick_lowest_rated(teams, half_cap)
-        if target and _place_with_group(target, player, placed, glookup, half_cap, log):
-            continue
-        target = _pick_lowest_rated(teams, max_per)
-        if target:
-            _place_with_group(target, player, placed, glookup, max_per, log)
+        above = sorted(
+            [p for p in rated_remaining if p.rating >= avg],
+            key=lambda p: -p.rating,
+        )
+        half_cap = max_per // 2
+        for player in above:
+            if player.player_id in placed:
+                continue
+            target = _pick_lowest_rated(teams, half_cap)
+            if target and _place_with_group(target, player, placed, glookup, half_cap, log):
+                continue
+            target = _pick_lowest_rated(teams, max_per)
+            if target:
+                _place_with_group(target, player, placed, glookup, max_per, log)
 
-    below = sorted(
-        [p for p in players if p.player_id not in placed and p.rating is not None],
-        key=lambda p: p.rating,
-    )
-    for player in below:
-        if player.player_id in placed:
-            continue
-        target = _pick_highest_rated(teams, max_per)
-        if target:
-            _place_with_group(target, player, placed, glookup, max_per, log)
+        below = sorted(
+            [p for p in players if p.player_id not in placed and p.rating is not None],
+            key=lambda p: p.rating,
+        )
+        for player in below:
+            if player.player_id in placed:
+                continue
+            target = _pick_highest_rated(teams, max_per)
+            if target:
+                _place_with_group(target, player, placed, glookup, max_per, log)
+    else:  # balance_by == "dob"
+        remaining = sorted(
+            [p for p in players if p.player_id not in placed],
+            key=lambda p: _dob_sort_key(p.dob),
+            reverse=True,  # oldest first
+        )
+        for player in remaining:
+            if player.player_id in placed:
+                continue
+            target = _pick_least_same_gender(teams, player.gender, max_per)
+            if target:
+                _place_with_group(target, player, placed, glookup, max_per, log)
 
     # Step 6: cleanup (unrated + true stragglers)
     unassigned = [p for p in players if p.player_id not in placed]

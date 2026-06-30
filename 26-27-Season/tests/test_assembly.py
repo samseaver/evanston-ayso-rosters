@@ -143,14 +143,58 @@ class TestAssembleEmptyTeams(unittest.TestCase):
         self.assertTrue(any(e.severity == "BLOCKER" and e.code == "no_teams" for e in log))
 
 
-class TestAssemble5U6URaises(unittest.TestCase):
-    def test_5u_not_implemented(self):
-        with self.assertRaises(NotImplementedError):
-            assemble_teams([], [], [], {}, "5U")
+class TestAssemble5UDobBalanced(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        field_map, _ = load_field_map(FIXTURES / "field_map.yaml")
+        cls.players = load_players(FIXTURES / "5U" / "5U_Unallocated.txt", field_map)
+        cls.volunteers = load_volunteers(FIXTURES / "5U" / "5U_Personnel.txt")
+        cls.coaches = load_coach_assignments(FIXTURES / "5U" / "5U_Coaches.tsv")
+        cls.teams, cls.log = assemble_teams(
+            players=cls.players,
+            coach_assignments=cls.coaches,
+            volunteers=cls.volunteers,
+            overrides={},
+            division="5U",
+        )
 
-    def test_6u_not_implemented(self):
-        with self.assertRaises(NotImplementedError):
-            assemble_teams([], [], [], {}, "6U")
+    def test_balance_by_inferred_as_dob(self):
+        # No explicit balance_by — should default to "dob" for 5U.
+        self.assertEqual(len(self.teams), 2)
+
+    def test_every_player_placed(self):
+        placed = {p.player_id for t in self.teams for p in t.players}
+        self.assertEqual(placed, {p.player_id for p in self.players})
+
+    def test_each_coach_kid_on_correct_team(self):
+        tm1 = next(t for t in self.teams if t.label == "TM 1")
+        tm2 = next(t for t in self.teams if t.label == "TM 2")
+        self.assertTrue(any(p.full_name == "Olivia Adams" for p in tm1.players))
+        self.assertTrue(any(p.full_name == "Felix Foster" for p in tm2.players))
+
+    def test_team_sizes_even_or_close(self):
+        sizes = sorted(t.size() for t in self.teams)
+        # 6 players, 2 teams → expect 3 and 3
+        self.assertEqual(sizes, [3, 3])
+
+    def test_gender_balance_within_one(self):
+        # 3F + 3M total. Each team should have at most 2 of one gender.
+        for t in self.teams:
+            f = sum(1 for p in t.players if p.gender == "f")
+            m = sum(1 for p in t.players if p.gender == "m")
+            self.assertLessEqual(abs(f - m), 1, f"Team {t.label}: {f}F {m}M")
+
+
+class TestBalanceByValidation(unittest.TestCase):
+    def test_unknown_balance_by_raises(self):
+        with self.assertRaises(ValueError):
+            assemble_teams([], [], [], {}, "8UB", balance_by="xyzzy")
+
+    def test_explicit_balance_by_overrides_default(self):
+        # Force "dob" mode on an 8U division. Should not raise; just balance
+        # differently. With empty inputs we just get the no_teams blocker.
+        teams, log = assemble_teams([], [], [], {}, "8UB", balance_by="dob")
+        self.assertEqual(teams, [])
 
 
 if __name__ == "__main__":
