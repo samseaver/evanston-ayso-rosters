@@ -39,6 +39,13 @@ class TestEndToEnd8UB(unittest.TestCase):
     def test_output_csv_written(self):
         self.assertTrue(self.output_path.exists())
 
+    def test_validation_report_md_written(self):
+        report_path = self.output_path.parent / "8UB_validation_report.md"
+        self.assertTrue(report_path.exists())
+        body = report_path.read_text()
+        self.assertIn("# 8UB validation report", body)
+        self.assertIn("**Status:** READY", body)
+
     def test_output_header(self):
         with open(self.output_path) as f:
             reader = csv.reader(f)

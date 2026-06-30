@@ -33,6 +33,7 @@ from loaders import (
     load_volunteers,
 )
 from output import write_teams_csv
+from report import write_report
 
 
 def run(season_dir: Path, division: str, extra_player_ids=None) -> int:
@@ -84,7 +85,9 @@ def run(season_dir: Path, division: str, extra_player_ids=None) -> int:
         log.insert(0, LogEntry("WARNING", "config", w))
 
     output_path = div_dir / f"{division}_Teams.csv"
+    report_path = div_dir / f"{division}_validation_report.md"
     write_teams_csv(output_path, division, teams, volunteers)
+    write_report(report_path, division, teams, log)
 
     blockers = [e for e in log if e.severity == "BLOCKER"]
     warnings = [e for e in log if e.severity == "WARNING"]
@@ -96,6 +99,7 @@ def run(season_dir: Path, division: str, extra_player_ids=None) -> int:
 
     print()
     print(f"Wrote {output_path}")
+    print(f"Wrote {report_path}")
     print(
         f"Summary: {len(teams)} team(s), "
         f"{sum(t.size() for t in teams)} player(s) placed, "
