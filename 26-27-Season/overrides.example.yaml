@@ -1,0 +1,57 @@
+# 26-27-Season/overrides.example.yaml
+#
+# Template for the per-division overrides.yaml. Copy to
+#   26-27-Season/<DIV>/overrides.yaml
+# in each division that needs manual intervention (10UB, 10UG, 12UB, 12UG
+# typically need the most; 5U/6U/14U often have none).
+#
+# This single file replaces three ad-hoc inputs from previous seasons:
+#   - <DIV>_Pairs.txt              → `groups:` below
+#   - <DIV>_Add_AssociatedPlayers.txt → `coach_children:` below
+#   - the `Team` column in
+#     <DIV>_Extra_Allocated.csv    → `extra_team_assignments:` below
+# Plus it subsumes the 24-25-only requests.txt notes under `notes:` so
+# accessibility/coach-preference asks flow through the validation report
+# instead of living in a file no script ever reads.
+#
+# All sections are optional — omit any that don't apply to a division.
+# Names are matched against the normalised player/coach name from the
+# AYSO export (lowercase, accent-stripped, whitespace-collapsed).
+
+# Groups of players who must end up on the same team. Each group is a
+# list of 2+ names; all members of a group land together. Transitive:
+#   - [Player A, Player B, Player C]
+# means all three on one team, not three separate pair statements.
+# (A 2-element group is just a pair, so this is a strict superset of
+# the old Pairs.txt format.)
+groups:
+  - [Player A, Player B]
+  - [Player A, Player C, Player D]
+
+# Coaches whose children couldn't be auto-resolved by the normal chain
+# (parents_singles lookup → Personnel.associatedPlayers field). The
+# script picks up children from here when both automatic sources fail
+# or return ambiguous results. List one or more children per coach.
+coach_children:
+  Coach One: [Player One]
+  Coach Two: [Player Two, Player Three]   # multiple kids on Coach Two's team
+
+# EXTRA league players (10U/12U only) pre-assigned to a specific team
+# rather than letting the balancer pick. Without an entry here, an
+# EXTRA player from Extra_Allocated.csv is placed automatically based
+# on team balance (rating × age × headcount).
+extra_team_assignments:
+  Player Three: 10UB-extra-01
+  Player Four: 10UB-extra-02
+
+# Free-form notes that should be surfaced when the named player is
+# processed. Written into the per-division validation_report.md under
+# an INFO section — not acted on automatically, just made visible so
+# nothing gets quietly forgotten.
+#
+# Use for: accessibility needs, returning-coach requests, sibling
+# carryovers, special-circumstances asks. Same content that used to
+# live in 24-25's requests.txt.
+notes:
+  Player Five: "Hearing aid in left ear; coach should know."
+  Player Six: "Asked to continue with last year's coach if possible."

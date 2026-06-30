@@ -13,7 +13,7 @@ Two seasons of incremental patches (see the 24-25 → 25-26 evolution in `REVIEW
 ## Phase 1 — Foundations (config-driven, fail-loud)
 
 - `[~]` **`field_map.yaml` per season** — semantic names for AYSO's volatile column headers and per-season filenames. Updating IDs becomes a config edit rather than a code change, and a missing key fails at startup. (Scaffold landed; consumed once the new script exists.)
-- `[ ]` **`overrides.yaml` per division** — single schema replacing `Pairs.txt` + `Add_AssociatedPlayers.txt` + the `Team` column in `Extra_Allocated.csv`. One file, one parser, one validation pass.
+- `[~]` **`overrides.yaml` per division** — single schema replacing `Pairs.txt` + `Add_AssociatedPlayers.txt` + the `Team` column in `Extra_Allocated.csv`, and folding in 24-25's standalone `requests.txt` notes. One file, one parser, one validation pass. (Template scaffolded at `26-27-Season/overrides.example.yaml`; consumed once the new script exists.)
 - `[ ]` **Schema validation at startup** — missing required fields, unknown keys, malformed YAML all fail loudly with line numbers before any roster work begins.
 
 ## Phase 2 — Pipeline
