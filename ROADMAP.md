@@ -19,8 +19,8 @@ Two seasons of incremental patches (see the 24-25 → 25-26 evolution in `REVIEW
 ## Phase 2 — Pipeline
 
 - `[x]` **Normalised name matching** — `26-27-Season/names.py`. Lowercase + accent strip + collapse whitespace + drop parenthetical annotations + nickname table (bob/robert, liz/elizabeth, etc.). Wired into assembly.py for coach→child resolution and group/override player-name matching. Ambiguous matches log a BLOCKER pointing at `overrides.yaml`. 25 unit tests.
-- `[~]` **Structured `validation_report.md` per division** — assembly returns a list of `LogEntry(severity, code, message)` with BLOCKER/WARNING/INFO tiers; non-zero exit on any BLOCKER. Currently printed to stdout from process.py; the markdown writer (`report.py`) is the remaining piece.
-- `[~]` **`assemble_teams()` in `26-27-Season/assembly.py`** — rating-based 8U–14U path complete with end-to-end test covering nickname/accent matching, parent-index resolution, overrides fallback, group placement, TBD skipping, even-split sizing. 5U/6U DOB path still raises `NotImplementedError`; the `balance_by=` unification is the remaining piece.
+- `[x]` **Structured `validation_report.md` per division** — `26-27-Season/report.py` formats the assembly log into markdown with BLOCKER / Warnings / Notes sections plus a status line (`READY` / `BLOCKED`). Written by `process.py` alongside the Teams.csv. Non-zero exit on any BLOCKER. 5 unit tests.
+- `[x]` **`assemble_teams(balance_by=...)` in `26-27-Season/assembly.py`** — both rating-based (8U–14U) and DOB-balanced (5U/6U) paths implemented behind a single function. Auto-infers `balance_by` from division but accepts an explicit override. DOB path balances by oldest-first sort with same-gender count as the placement metric. 5U fixture exercises the DOB path end-to-end; full e2e produces 3+3 split with gender balance.
 - `[x]` **Drop the coefficient-of-variation rating fallback** — replaced by `26-27-Season/ratings.py`: current TSV → previous TSV → experience enum → `None`, with `needs_rating` list surfaced as BLOCKERs. EXTRA-league floor of 4 still applied. No silent defaults.
 
 ## Phase 3 — Outputs
@@ -30,7 +30,7 @@ Two seasons of incremental patches (see the 24-25 → 25-26 evolution in `REVIEW
 
 ## Phase 4 — Workflow
 
-- `[~]` **Single entrypoint** — `26-27-Season/process.py` runs one division end-to-end (`python process.py SEASON_DIR DIVISION`). Multi-division batch loop (`python rosters.py SEASON_DIR [--only DIV]`) is the remaining piece.
+- `[x]` **Single entrypoint** — two complementary entry points: `26-27-Season/process.py SEASON_DIR DIVISION` for one division, `26-27-Season/rosters.py SEASON_DIR [--only DIV] [--skip DIV]` for the full multi-division batch. The batch runner reports per-division status and exits non-zero if any division is BLOCKED or FAILED — no need to scan output for warnings.
 - `[x]` **Slim the wide exports at load time** — `26-27-Season/loaders.py` reads only the columns the pipeline uses, returning typed dataclasses (`Player`, `Volunteer`, `CoachAssignment`). Originals stay on disk untouched for forensics.
 
 ## Out of scope (acknowledged ceilings)
