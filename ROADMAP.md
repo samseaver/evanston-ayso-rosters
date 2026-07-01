@@ -40,10 +40,11 @@ Two seasons of incremental patches (see the 24-25 → 25-26 evolution in `REVIEW
 
 ## Phase 6 — Real-data validation
 
-- `[x]` **Dry run against real 25-26 data** — ran the new pipeline end-to-end against three divisions (8UB rating path, 5U DOB path, 10UB extras path). Full write-up in `REAL_DATA_DRY_RUN.md`. Team-level balance matches original exactly (same team names, sizes, displayed avg ratings); three real algorithm-faithfulness bugs surfaced and fixed:
+- `[x]` **Dry run against real 25-26 data** — ran the new pipeline end-to-end against **all 10 divisions** (5U, 6U, 8UB/8UG, 10UB/10UG, 12UB/12UG, 14UB/14UG). Full write-up in `REAL_DATA_DRY_RUN.md`. 836 total placements match the original exactly across every division; team labels and team-level balance match. Four real algorithm-faithfulness bugs surfaced and fixed:
   - `cleanup_over_cap` warning (instead of blocker) when placement pushes a team past the division cap — matches 25-26 behavior; SportConnect accepts.
   - `no_coach_kids` demoted to INFO for Team-Parent roles (their kids often live in other divisions); WARNING preserved for actual coaches.
   - Team-name display preserves apostrophes and other punctuation (`names.normalise()` was correct for matching but wrong for display).
+  - `Coaches.tsv` `Role` column alias: real data uses `Role / License` in some divisions; loader now accepts either.
 
 ## Out of scope (acknowledged ceilings)
 

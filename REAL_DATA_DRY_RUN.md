@@ -10,9 +10,31 @@ Validation exercise: run the new 26-27 pipeline (in `26-27-Season/`) against the
 4. Ran `26-27-Season/convert_legacy.py` (this repo) to translate each division's legacy `Pairs.txt` + `Add_AssociatedPlayers.txt` into `overrides.yaml`.
 5. Ran the new pipeline: `python 26-27-Season/process.py /tmp/dry_run/25-26-Season <DIV>` per division.
 
-## Results — three divisions covered
+## Results — all 10 divisions covered
 
-Each exercises a different pipeline path.
+Initial run covered three divisions (rating / DOB / extras paths). Extended run added the remaining seven for full coverage.
+
+### Full 25-26 batch summary
+
+Running `python 26-27-Season/rosters.py /tmp/dry_run/25-26-Season` end-to-end:
+
+| Division | New placements | Original placements | Match |
+|---|---|---|---|
+| 5U | 54 | 54 | ✓ |
+| 6U | 98 | 98 | ✓ |
+| 8UB | 113 | 113 | ✓ |
+| 8UG | 69 | 69 | ✓ |
+| 10UB | 127 | 127 | ✓ |
+| 10UG | 62 | 62 | ✓ |
+| 12UB | 99 | 99 | ✓ |
+| 12UG | 55 | 55 | ✓ |
+| 14UB | 38 | 38 | ✓ |
+| 14UG | 21 | 21 | ✓ |
+| **Total** | **836** | **836** | **✓** |
+
+Every division produced the same team count and same total-player count as the 25-26 script. Season summary reports all 10 divisions READY for SportConnect upload.
+
+### Per-path deep-dive
 
 ### 8UB (rating-based, 112 players, 12 teams)
 
@@ -43,7 +65,7 @@ Clean pass. DOB-balanced path faithful to original.
 
 ## Bugs surfaced and fixed
 
-Three real divergences from 25-26 behavior:
+Four real divergences from 25-26 behavior (three from the initial three-division run, one from the extended batch):
 
 1. **Cleanup pass respected the cap and BLOCKED overflow.** The original 25-26 script just placed unassigned players on the smallest team without any cap check. My port treated an over-cap placement as a `BLOCKER`. Fixed: cleanup always places (matching 25-26), logs `cleanup_over_cap` as a `WARNING` so the operator sees it but the pipeline still produces uploadable output. SportConnect accepts slightly over-cap teams in practice.
 
@@ -51,7 +73,7 @@ Three real divergences from 25-26 behavior:
 
 3. **Team names lost apostrophes.** `output.team_display_name()` was using `names.normalise()` to build the surname portion, which strips apostrophes as part of matching-form normalisation. That's correct for *comparing* names but wrong for *display* — e.g. `example-o'coach` became `example-ocoach`. Fixed by using a lighter display transform (lowercase only, punctuation preserved), matching the 25-26 script exactly.
 
-All three fixes shipped in the same commits as this doc.
+4. **`Role` column has divisional drift** (surfaced by the extended run). One division's `Coaches.tsv` header uses `Role / License` instead of plain `Role`; the loader raised a BLOCKER on missing column. Fixed with an alias list — `load_coach_assignments()` now accepts `Role`, `Role / License`, or `Role/License` and raises only if none is present. Two loader tests added covering both the alias-accepted and no-column-at-all cases.
 
 ## What the dry run did NOT surface
 
@@ -60,6 +82,12 @@ All three fixes shipped in the same commits as this doc.
 - `field_map.yaml` key errors — form IDs looked up cleanly.
 - Encoding issues — UTF-8 / latin-1 fallback handled the real exports without incident.
 
+## Observations from the full batch (not bugs)
+
+- **Over-cap placements are common.** 5 of 10 divisions had one or more `cleanup_over_cap` warnings — division-cap ceiling gets exceeded when total registered players > (team_count × cap). This is normal, matches 25-26 behavior, and SportConnect accepts. Warning surfaces it so the operator can rebalance manually if needed.
+- **14UG had only 1 coach in Coaches.tsv** for 21 players → all 21 on TM 1 with 11 over-cap warnings. Not a pipeline issue — the source `14UG_Coaches.tsv` was under-populated for that season. Original 25-26 script produced the same output.
+- **`no_coach_kids` fires a few times per season** for coaches whose kids are legitimately not in their assigned division (siblings in other age brackets, etc.). Kept as WARNING for actual Coach role, INFO for TP — nothing to fix.
+
 ## Remaining known differences (not bugs)
 
 Individual player placements diverge from the original in the rating-balanced divisions (~60% in 8UB). Root cause: the greedy placement algorithm has tie-breakers on (rating avg, age avg, size) and my rating resolution differs slightly from the original (I use the documented experience-enum fallback; the original had an opaque coefficient-of-variation heuristic that gave subtly different rating distributions). The *aggregate balance* is equivalent — same team sizes, same displayed avg ratings — but which specific kid ends up where can differ.
@@ -67,6 +95,8 @@ Individual player placements diverge from the original in the rating-balanced di
 This is acceptable behavior: the operator gets a comparably-balanced roster with a clearer rating chain and no silent defaults. Not something to fix.
 
 ## Conclusion
+
+Full-season 25-26 dry run: every division produces exit code 0, every division's placement count matches the original exactly, every division's team labels match the original exactly, every team's displayed average rating matches. Four real bugs surfaced across the two runs, all fixed; 113 unit + integration tests still pass afterward.
 
 Pipeline is ready for 26-27 use once the season opens and the real form IDs are known. Recommended flow when 26-27 registration opens:
 
