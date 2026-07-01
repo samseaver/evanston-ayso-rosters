@@ -10,7 +10,9 @@ If you spot a real name anywhere in the tracked files, please open an issue or D
 
 ## What's here
 
-- **`REVIEW.md`** — written review of the 24-25 and 25-26 seasons: what files exist, how the processing pipeline works, where the rough edges are, and a categorised list of simplification opportunities.
-- **`ROADMAP.md`** — the actionable shortlist of what's being built for the 26-27 redesign, with phase ordering and status.
-- **`24-25-Season/`, `25-26-Season/`** — the scripts as they were actually run those seasons. Kept as historical reference; not actively maintained.
-- **`26-27-Season/`** — the active redesign. Currently just config scaffolding; the new processing script will land here as the roadmap is worked through.
+- **`SEASON_SETUP.md`** — start here if you're running the pipeline for a new season. Short, action-oriented, written for a busy parent volunteer.
+- **`REVIEW.md`** — written review of the 24-25 and 25-26 seasons: input file formats, how the processing pipeline works, where the rough edges are, and a categorised list of simplification opportunities. Read this if you want the background.
+- **`ROADMAP.md`** — actionable shortlist of what's been built for the 26-27 redesign, with phase status. All six phases are now `[x]` complete.
+- **`REAL_DATA_DRY_RUN.md`** — validation exercise: the new pipeline was run against every 25-26 division and matches the original 25-26 script's placement counts exactly.
+- **`24-25-Season/`, `25-26-Season/`** — the scripts as they were run those seasons. Kept as historical reference; not actively maintained.
+- **`26-27-Season/`** — the active redesign. `rosters.py` is the entry point.
