@@ -36,6 +36,14 @@ Two seasons of incremental patches (see the 24-25 → 25-26 evolution in `REVIEW
 ## Phase 5 — Feature parity with 25-26
 
 - `[x]` **EXTRA-league loader** — `loaders.load_extras()` reads `<DIV>_Extra_Allocated.csv`; `process.py` matches names against the division roster and passes the resolved player-IDs to `assembly.assemble_teams()` (which already applies the rating-4 floor and lowest-balance placement). Unmatched EXTRA names log a WARNING; ambiguous matches log a BLOCKER. 10UB fixture with a deliberately-missing EXTRA player exercises the warning path end-to-end.
+- `[x]` **Legacy override migration** — `26-27-Season/convert_legacy.py <SEASON_DIR>` translates each division's `<DIV>_Pairs.txt` + `<DIV>_Add_AssociatedPlayers.txt` into a `<DIV>/overrides.yaml`. Enables running the new pipeline against historic seasons for validation.
+
+## Phase 6 — Real-data validation
+
+- `[x]` **Dry run against real 25-26 data** — ran the new pipeline end-to-end against three divisions (8UB rating path, 5U DOB path, 10UB extras path). Full write-up in `REAL_DATA_DRY_RUN.md`. Team-level balance matches original exactly (same team names, sizes, displayed avg ratings); three real algorithm-faithfulness bugs surfaced and fixed:
+  - `cleanup_over_cap` warning (instead of blocker) when placement pushes a team past the division cap — matches 25-26 behavior; SportConnect accepts.
+  - `no_coach_kids` demoted to INFO for Team-Parent roles (their kids often live in other divisions); WARNING preserved for actual coaches.
+  - Team-name display preserves apostrophes and other punctuation (`names.normalise()` was correct for matching but wrong for display).
 
 ## Out of scope (acknowledged ceilings)
 
