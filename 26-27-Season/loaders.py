@@ -16,6 +16,7 @@ Adds:
 """
 
 import csv
+import os
 from dataclasses import dataclass, field
 from typing import List, Optional
 
@@ -204,6 +205,31 @@ def load_coach_assignments(coaches_path):
                 )
             )
     return coaches
+
+
+def load_extras(extras_path):
+    """Read <DIV>_Extra_Allocated.csv and return list[(first, last)].
+
+    The CSV ships with EXTRA-league (tryout-selected) players that need to
+    be spread across the rec teams. Names returned as-exported (case
+    preserved); the caller normalises and matches against the division
+    roster to get player_ids. Returns [] if the file does not exist —
+    EXTRA is 10U/12U only and most divisions won't have one.
+    """
+    if not os.path.exists(extras_path):
+        return []
+
+    required_columns = ["Player First Name", "Player Last Name"]
+    extras = []
+    with _open_text(extras_path) as f:
+        reader = csv.DictReader(f, delimiter=",")
+        _require_columns(extras_path, reader.fieldnames or [], required_columns)
+        for row in reader:
+            first = (row["Player First Name"] or "").strip()
+            last = (row["Player Last Name"] or "").strip()
+            if first and last:
+                extras.append((first, last))
+    return extras
 
 
 def load_ratings(ratings_path):

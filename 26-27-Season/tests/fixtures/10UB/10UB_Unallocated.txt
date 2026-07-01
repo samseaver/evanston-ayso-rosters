@@ -1,0 +1,12 @@
+PlayerID	Player Name	UserID	Comments	Recent Team	Age	Division Price Payment Status	Date Of Birth	Parent FirstName	Parent LastName	Gender	Primary Contact Email	Primary Contact Telephone	Secondary Contact FirstName	Secondary Contact LastName	Years of Experience:(99999001)	Player's Experience Level(99999002)
+93000001	Aiden Smith	94100001		NA	9	Paid	04/15/2017	Adam	Smith	M	adam.smith@example.com	555-0301	Eva	Smith	2	Has played recreational soccer (AYSO or similar)
+93000002	Eli Jones	94100002		NA	10	Paid	08/22/2016	Beth	Jones	M	beth.jones@example.com	555-0302	Pat	Jones	3	Has played recreational soccer (AYSO or similar)
+93000003	Mateo Lopez	94100003		NA	9	Paid	01/05/2017	Carlos	Lopez	M	carlos.lopez@example.com	555-0303	Marta	Lopez	2	Has played recreational soccer (AYSO or similar)
+93000004	Kai Kim	94100004		NA	10	Paid	06/14/2016	Min	Kim	M	min.kim@example.com	555-0304	Joon	Kim	3	Has played recreational soccer (AYSO or similar)
+93000005	Logan Brown	94100005		NA	9	Paid	02/20/2017	Diana	Brown	M	diana.brown@example.com	555-0305	Eric	Brown	3	Has played recreational soccer (AYSO or similar)
+93000006	Hugo Patel	94100006		NA	10	Paid	09/05/2016	Raj	Patel	M	raj.patel@example.com	555-0306	Priya	Patel	4	Has played competitive soccer (club or travel)
+93000007	Ari Choi	94100007		NA	9	Paid	12/03/2017	Jin	Choi	M	jin.choi@example.com	555-0307	Sun	Choi	2	Has played recreational soccer (AYSO or similar)
+93000008	Jake White	94100008		NA	9	Paid	11/14/2017	Tom	White	M	tom.white@example.com	555-0308	Liz	White	1	No or limited soccer experience
+93000009	Sam Green	94100009		NA	10	Paid	07/22/2016	Alice	Green	M	alice.green@example.com	555-0309	Bob	Green	2	Has played recreational soccer (AYSO or similar)
+93000010	Max Lee	94100010		NA	9	Paid	04/01/2017	Pat	Lee	M	pat.lee@example.com	555-0310	Sam	Lee	1	No or limited soccer experience
+93000011	Theo Foster	94100011		NA	10	Paid	10/10/2016	Sara	Foster	M	sara.foster@example.com	555-0311	Tom	Foster	2	Has played recreational soccer (AYSO or similar)

@@ -27,6 +27,7 @@ from loaders import (
     load_players,
     load_volunteers,
     load_coach_assignments,
+    load_extras,
     load_ratings,
 )
 
@@ -128,6 +129,25 @@ class TestLoadRatings(unittest.TestCase):
     def test_previous_season(self):
         ratings = load_ratings(FIXTURES / "2025_Player_Ratings.tsv")
         self.assertEqual(ratings[("emma", "davis")], 4)
+
+
+class TestLoadExtras(unittest.TestCase):
+    def test_loads_10ub_fixture(self):
+        extras = load_extras(FIXTURES / "10UB" / "10UB_Extra_Allocated.csv")
+        self.assertEqual(len(extras), 4)
+        self.assertIn(("Logan", "Brown"), extras)
+        self.assertIn(("Ben", "Chen"), extras)
+
+    def test_missing_file_returns_empty(self):
+        extras = load_extras(FIXTURES / "8UB" / "8UB_Extra_Allocated.csv")
+        # 8UB fixture intentionally doesn't have one — should not raise.
+        self.assertEqual(extras, [])
+
+    def test_missing_required_column_raises(self):
+        # Synthetic path that exists but won't have the column.
+        bogus = FIXTURES / "8UB" / "8UB_Coaches.tsv"
+        with self.assertRaises(ValidationError):
+            load_extras(bogus)
 
 
 class TestLoadOverrides(unittest.TestCase):
