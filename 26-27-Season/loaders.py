@@ -186,22 +186,34 @@ def load_volunteers(personnel_path):
 def load_coach_assignments(coaches_path):
     """Read <DIV>_Coaches.tsv and return list[CoachAssignment].
 
+    Accepts several column names for the coach role — real data across
+    divisions has drift (`Role`, `Role / License`, `Role/License`). Team,
+    First Name, and Last Name are strict.
+
     TBD team labels are returned as-is; the caller decides whether to skip
     them. Empty fields stay empty (whitespace stripped).
     """
-    required_columns = ["Team", "First Name", "Last Name", "Role"]
+    required_columns = ["Team", "First Name", "Last Name"]
+    role_aliases = ["Role", "Role / License", "Role/License"]
 
     coaches = []
     with _open_text(coaches_path) as f:
         reader = csv.DictReader(f, delimiter="\t")
-        _require_columns(coaches_path, reader.fieldnames or [], required_columns)
+        fields = reader.fieldnames or []
+        _require_columns(coaches_path, fields, required_columns)
+        role_col = next((c for c in role_aliases if c in fields), None)
+        if role_col is None:
+            raise ValidationError(
+                f"{coaches_path}: missing required Role column "
+                f"(expected one of: {', '.join(role_aliases)})"
+            )
         for row in reader:
             coaches.append(
                 CoachAssignment(
                     team_label=row["Team"].strip(),
                     first_name=row["First Name"].strip(),
                     last_name=row["Last Name"].strip(),
-                    role=row["Role"].strip(),
+                    role=row[role_col].strip(),
                 )
             )
     return coaches

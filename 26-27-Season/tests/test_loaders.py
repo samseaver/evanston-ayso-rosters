@@ -117,6 +117,33 @@ class TestLoadCoachAssignments(unittest.TestCase):
         self.assertEqual(bob.last_name, "Smith")
         self.assertEqual(bob.team_label, "TM 1")
 
+    def test_role_column_alias_accepted(self):
+        # Real 25-26 data has some divisions using "Role / License" instead of
+        # plain "Role" as the column header. Loader should accept either.
+        import tempfile, os
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".tsv", delete=False) as f:
+            f.write("Team\tFirst Name\tLast Name\tRole / License\tNotes\n")
+            f.write("TM 1\tJohn\tExample\tCoach\t\n")
+            path = f.name
+        try:
+            coaches = load_coach_assignments(path)
+            self.assertEqual(len(coaches), 1)
+            self.assertEqual(coaches[0].role, "Coach")
+        finally:
+            os.unlink(path)
+
+    def test_missing_role_column_raises(self):
+        import tempfile, os
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".tsv", delete=False) as f:
+            f.write("Team\tFirst Name\tLast Name\tNotes\n")
+            f.write("TM 1\tJohn\tExample\t\n")
+            path = f.name
+        try:
+            with self.assertRaises(ValidationError):
+                load_coach_assignments(path)
+        finally:
+            os.unlink(path)
+
 
 class TestLoadRatings(unittest.TestCase):
     def test_current_season(self):
