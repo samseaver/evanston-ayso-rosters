@@ -32,6 +32,27 @@ Expect ~30–60 minutes gathering files, ~5 minutes running the pipeline, plus w
 
 That's it. Everything else the pipeline generates.
 
+## The Coaches spreadsheet — a note on format
+
+Unlike the AYSO exports, `<DIV>_Coaches.tsv` is a working sheet you and your fellow coordinators maintain by hand — usually a shared Google Sheet you export as TSV per division at the end.
+
+The scripts are strict about **four column headers** and completely forgiving about the rest:
+
+| Column header | Notes |
+|---|---|
+| `Team` | Value can be `TM 1`, `TM 2`, etc. Rows with value `TBD` are silently skipped. |
+| `First Name` | Coach or team parent given name. |
+| `Last Name` | Coach or team parent surname. |
+| `Role` — or `Role / License` — or `Role/License` | Value is free text; `TP` and `Team Parent` are recognised specially and treated more leniently. |
+
+Any other columns you add (`Notes`, `Coaching/Volunteer Partner`, `Solo/Paired`, `AYSO Exp.`, `Multiple divisions`, `Tentative Team`, whatever) are ignored — feel free to keep whatever helps your workflow.
+
+**Worth knowing:**
+- Coach names don't have to match AYSO records exactly — nicknames (`Bob` vs `Robert`) and accents (`Maria` vs `María`) are handled automatically.
+- If a required header gets renamed by mistake in the sheet, the pipeline fails loudly at startup and names the column it can't find — no silent data loss.
+- Multiple rows with the same `Team` value are grouped into that team's coaching staff.
+- One tab per division in the Google Sheet, exported as TSV when you're ready to run.
+
 ## Step-by-step
 
 ### 1. Grab the exports
