@@ -34,8 +34,25 @@ OUTPUT_HEADER = [
 
 
 def team_display_name(division: str, index: int, team) -> str:
-    """Build the canonical team name used in <DIV>_Teams.csv."""
-    surnames = [normalise(ca.last_name).split()[-1] for ca in team.coaches if ca.last_name.strip()]
+    """Build the canonical team name used in <DIV>_Teams.csv.
+
+    Matches the 25-26 script's format exactly: DIVISION - NN - lastname/lastname/...
+    where each lastname is the coach's last-name column lowercased with the
+    last space-separated token retained. Punctuation like apostrophes and
+    hyphens is preserved (e.g. o'example stays o'example; hyphenated-name
+    stays hyphenated).
+
+    Do NOT use names.normalise() here — that's for *matching* (dropping
+    accents and punctuation to compare). Display needs the punctuation kept
+    so team names in Teams.csv agree with any existing SportConnect labels.
+    """
+    surnames = []
+    for ca in team.coaches:
+        if not ca.last_name.strip():
+            continue
+        tokens = ca.last_name.strip().lower().split()
+        if tokens:
+            surnames.append(tokens[-1])
     surnames_part = "/".join(surnames) if surnames else "unknown"
     return f"{division} - {index:02d} - {surnames_part}"
 

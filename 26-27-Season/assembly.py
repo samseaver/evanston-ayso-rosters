@@ -163,10 +163,17 @@ def _resolve_coach_children(
                 source=f"Personnel.associatedPlayers[{v.full_name!r}]",
             )
 
+    # Team parents legitimately often have no kid in this division (their kid
+    # is in another age bracket). Demote to INFO for TP; keep WARNING for real
+    # coaches so mismatches don't slip past.
+    role_l = ca.role.strip().lower()
+    is_tp = role_l in ("tp", "team parent") or "team parent" in role_l
+    severity = "INFO" if is_tp else "WARNING"
     log.append(LogEntry(
-        "WARNING", "no_coach_kids",
-        f"Could not resolve children for coach '{coach_full}'. "
-        f"Add an entry under overrides.coach_children if applicable."
+        severity, "no_coach_kids",
+        f"Could not resolve children for {ca.role.strip() or 'staff'} '{coach_full}'. "
+        f"Ignore if their kid is in a different division; otherwise add an "
+        f"entry under overrides.coach_children."
     ))
     return []
 
@@ -414,21 +421,28 @@ def assemble_teams(
             if target:
                 _place_with_group(target, player, placed, glookup, max_per, log)
 
-    # Step 6: cleanup (unrated + true stragglers)
+    # Step 6: cleanup (unrated + true stragglers). Faithful to 25-26: always
+    # place, even if it takes the smallest team above the division cap.
+    # SportConnect accepts slightly over-cap rosters in practice; the operator
+    # can rebalance manually if needed. Log severity depends on the outcome:
+    # over-cap = WARNING (needs eyeballs); within-cap = INFO (routine).
     unassigned = [p for p in players if p.player_id not in placed]
     for player in unassigned:
         target = min(teams, key=lambda t: t.size())
-        if target.size() < max_per:
-            _place(target, player, placed)
+        over_cap_before = target.size() >= max_per
+        _place(target, player, placed)
+        if over_cap_before:
             log.append(LogEntry(
-                "WARNING", "cleanup_placement",
-                f"{player.full_name} placed on smallest team {target.label} "
-                f"during cleanup (unrated or could not balance)."
+                "WARNING", "cleanup_over_cap",
+                f"{player.full_name} placed on {target.label}, which is now "
+                f"{target.size()} players (over cap of {max_per}). "
+                f"Rebalance manually if SportConnect rejects the upload."
             ))
         else:
             log.append(LogEntry(
-                "BLOCKER", "unassigned",
-                f"Could not place {player.full_name} — every team at cap of {max_per}."
+                "INFO", "cleanup_placement",
+                f"{player.full_name} placed on smallest team {target.label} "
+                f"during cleanup pass."
             ))
 
     # Mark which teams carry EXTRA players
