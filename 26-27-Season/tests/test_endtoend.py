@@ -100,5 +100,49 @@ class TestEndToEnd8UB(unittest.TestCase):
             self.assertEqual(c, 1, f"PlayerID {pid} appears on {c} teams")
 
 
+class TestEndToEnd10UBExtras(unittest.TestCase):
+    """End-to-end against the 10UB fixture, which exercises EXTRA-league
+    loading: 4 names in Extra_Allocated.csv, 3 of which match the roster
+    (Ben Chen is intentionally absent to exercise the extra_not_in_core
+    warning path)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tmpdir = Path(tempfile.mkdtemp(prefix="ayso_e2e_10ub_"))
+        season = cls.tmpdir / "26-27"
+        shutil.copytree(FIXTURES, season)
+        cls.result = process.run(season, "10UB")
+        cls.season = season
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.tmpdir, ignore_errors=True)
+
+    def test_exit_zero_despite_warning(self):
+        # Ben Chen missing from roster is a WARNING, not a BLOCKER.
+        self.assertEqual(self.result.exit_code, 0)
+
+    def test_warning_logged_for_missing_extra(self):
+        self.assertGreaterEqual(self.result.warnings_count, 1)
+
+    def test_all_11_roster_players_placed(self):
+        # 11 players in the Unallocated fixture; 4th extra (Ben Chen)
+        # is intentionally not in the roster so it doesn't get placed.
+        self.assertEqual(self.result.players_count, 11)
+
+    def test_teams_csv_written(self):
+        out = self.season / "10UB" / "10UB_Teams.csv"
+        self.assertTrue(out.exists())
+        body = out.read_text()
+        for matched_extra in ("Logan Brown", "Hugo Patel", "Ari Choi"):
+            self.assertIn(matched_extra, body, f"Expected {matched_extra} in output CSV")
+        self.assertNotIn("Ben Chen", body)
+
+    def test_validation_report_lists_missing_extra(self):
+        report = (self.season / "10UB" / "10UB_validation_report.md").read_text()
+        self.assertIn("extra_not_in_core", report)
+        self.assertIn("Ben Chen", report)
+
+
 if __name__ == "__main__":
     unittest.main()

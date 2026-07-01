@@ -26,12 +26,14 @@ from assembly import assemble_teams, LogEntry
 from loaders import (
     ValidationError,
     load_coach_assignments,
+    load_extras,
     load_field_map,
     load_overrides,
     load_players,
     load_ratings,
     load_volunteers,
 )
+from names import names_match
 from output import write_teams_csv
 from report import write_report
 from summary import DivisionResult, write_division_summary
@@ -65,6 +67,31 @@ def run(season_dir: Path, division: str, extra_player_ids=None) -> DivisionResul
         load_ratings(previous_ratings_path) if previous_ratings_path.exists() else {}
     )
 
+    # Pre-build an extras log so we can attach it before assembly mutates `log`.
+    extras_log: list = []
+    if not extra_player_ids:
+        # No explicit CLI override — auto-load from Extra_Allocated.csv if present.
+        extras_csv = div_dir / f"{division}_Extra_Allocated.csv"
+        extras_names = load_extras(extras_csv)
+        extra_player_ids = set()
+        for first, last in extras_names:
+            full = f"{first} {last}"
+            matches = [p for p in players if names_match(p.full_name, full)]
+            if len(matches) == 1:
+                extra_player_ids.add(matches[0].player_id)
+            elif len(matches) == 0:
+                extras_log.append(LogEntry(
+                    "WARNING", "extra_not_in_core",
+                    f"EXTRA player '{full}' from {extras_csv.name} not found "
+                    f"in division roster — skipped."
+                ))
+            else:
+                extras_log.append(LogEntry(
+                    "BLOCKER", "extra_ambiguous",
+                    f"EXTRA name '{full}' matches multiple players: "
+                    f"{[m.full_name for m in matches]}"
+                ))
+
     needs_rating = ratings.resolve_all(
         players, current_ratings, previous_ratings, extra_player_ids=extra_player_ids
     )
@@ -86,6 +113,9 @@ def run(season_dir: Path, division: str, extra_player_ids=None) -> DivisionResul
         ))
     for w in fm_warnings + ov_warnings:
         log.insert(0, LogEntry("WARNING", "config", w))
+    # Extras log entries (matched at load time) prepended after the assembly run.
+    for entry in extras_log:
+        log.insert(0, entry)
 
     output_path = div_dir / f"{division}_Teams.csv"
     report_path = div_dir / f"{division}_validation_report.md"

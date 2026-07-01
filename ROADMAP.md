@@ -33,6 +33,10 @@ Two seasons of incremental patches (see the 24-25 → 25-26 evolution in `REVIEW
 - `[x]` **Single entrypoint** — two complementary entry points: `26-27-Season/process.py SEASON_DIR DIVISION` for one division, `26-27-Season/rosters.py SEASON_DIR [--only DIV] [--skip DIV]` for the full multi-division batch. The batch runner reports per-division status and exits non-zero if any division is BLOCKED or FAILED — no need to scan output for warnings.
 - `[x]` **Slim the wide exports at load time** — `26-27-Season/loaders.py` reads only the columns the pipeline uses, returning typed dataclasses (`Player`, `Volunteer`, `CoachAssignment`). Originals stay on disk untouched for forensics.
 
+## Phase 5 — Feature parity with 25-26
+
+- `[x]` **EXTRA-league loader** — `loaders.load_extras()` reads `<DIV>_Extra_Allocated.csv`; `process.py` matches names against the division roster and passes the resolved player-IDs to `assembly.assemble_teams()` (which already applies the rating-4 floor and lowest-balance placement). Unmatched EXTRA names log a WARNING; ambiguous matches log a BLOCKER. 10UB fixture with a deliberately-missing EXTRA player exercises the warning path end-to-end.
+
 ## Out of scope (acknowledged ceilings)
 
 - **SportConnect upload stays manual.** No API. Every simplification above pays off in everything *upstream* of that final manual step.

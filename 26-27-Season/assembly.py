@@ -238,11 +238,18 @@ def _pick_lowest_rated(teams, cap, player_count_factor=False):
 
 
 def _pick_highest_rated(teams, cap):
-    """Team with highest avg rating that's under cap. For below-average placement."""
+    """Team with highest avg rating that's under cap. For below-average placement.
+
+    Mirrors the 25-26 script's `sorted(..., reverse=True)` sort key:
+    (rating, age, size) all descending. The size-descending tiebreaker looks
+    counter-intuitive for balance but matches the historical behaviour —
+    concentrates low-rated players on the already-larger team rather than
+    smoothing sizes.
+    """
     available = [t for t in teams if t.size() < cap]
     if not available:
         return None
-    return max(available, key=lambda t: (t.rating_avg, t.age_avg, -t.size()))
+    return max(available, key=lambda t: (t.rating_avg, t.age_avg, t.size()))
 
 
 def _pick_least_same_gender(teams, player_gender, cap):
